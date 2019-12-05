@@ -44,8 +44,8 @@ exports.adminLogin = (req, res) => {
   Admin.findOne({ email: req.body.email })
     .exec()
     .then(admin => {
-      if (admin.length < 1) {
-        return res.status(401).json({ error: "Admin not found" });
+      if (!admin) {
+        res.status(401).json({ error: "Admin not found" });
       }
       bcrypt.compare(req.body.password, admin.password, (err, result) => {
         if (err) {
@@ -62,12 +62,11 @@ exports.adminLogin = (req, res) => {
             "secret",
             { expiresIn: "240h" }
           );
-          return res.redirect("/admin/dashboard");
 
-          // return res.status(200).json({
-          //   message: "Authentification Successful",
-          //   token: token
-          // });
+          return res.status(200).json({
+            message: "Authentification Successful",
+            token: token
+          });
         }
       });
     });
@@ -113,18 +112,12 @@ exports.getUserById = async (req, res) => {
     let userVehicles = await Vehicle.find({ userId: id });
     let driver = await Driver.find({ userId: id });
     let wothiness = await Worthines.find({ userId: id });
-    // let qrcode = await QRCode.toDataURL(id);
     res.status(200).json({
-      // qrcode: qrcode,
-      user: userDetails,
-      vehicle: userVehicles,
-      driver: driver,
-      wothiness: wothiness
+      user: { userDetails, userVehicles, driver, wothiness }
     });
   } catch (err) {
     res.status(404).json({ error: err, message: "User Not Found" });
   }
-  // User.find({});
 };
 
 exports.registerUserVehicle = async (req, res) => {
@@ -147,7 +140,8 @@ exports.registerUserVehicle = async (req, res) => {
       current_milleage: req.body.current_milleage,
       alarm_type: req.body.alarm_type,
       dealer: req.body.dealer,
-      dealer_town: req.body.dealer_town
+      dealer_town: req.body.dealer_town,
+      plate_number: req.body.plate_nunber
     });
     let response = await vehicle.save();
     res.status(200).json({ data: response });
@@ -183,8 +177,8 @@ exports.registerUsersWorthiness = async (req, res) => {
     let worthines = new Worthines({
       userId: req.params.userId,
       given_name: req.body.given_name,
-      Acn: req.body.Acn,
-      Main_raod: req.body.Main_raod,
+      acn: req.body.Acn,
+      main_road: req.body.Main_raod,
       business_address: req.body.business_address,
       post_code: req.body.post_code,
       year: req.body.year,
@@ -200,5 +194,19 @@ exports.registerUsersWorthiness = async (req, res) => {
     res.status(200).json({ data: response });
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.getUserByEmail = async (req, res) => {
+  try {
+    let email = req.body.email;
+    let response = await User.findOne({ email: email });
+    // if (!response) {
+    //   res.status(404).json({ error: "User Not found" });
+    // } else {
+    res.status(200).json({ data: response });
+    // }
+  } catch (err) {
+    res.status(500).json({ error: err });
   }
 };

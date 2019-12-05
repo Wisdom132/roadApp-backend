@@ -15,7 +15,6 @@ const driverSchema = mongoose.Schema({
   blood_group: String,
   geneotype: String,
   disabilities: String
-  //   picture: String
 });
 
 module.exports = mongoose.model("Driver", driverSchema);

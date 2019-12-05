@@ -21,7 +21,8 @@ const vehicleSchema = mongoose.Schema({
   current_milleage: String,
   alarm_type: String,
   dealer: String,
-  dealer_town: String
+  dealer_town: String,
+  plate_number: String
 });
 
 module.exports = mongoose.model("Vehicle", vehicleSchema);

@@ -10,7 +10,7 @@ router.get("/list-admins", admincontroller.getAllAdmins);
 router.post("/registeruser", admincontroller.registerNewUser);
 router.get("/list-users", admincontroller.listAllUsers);
 router.get("/user/:userId", admincontroller.getUserById);
-
+router.post("/getuserbyemail", admincontroller.getUserByEmail);
 router.post("/registervehicle/:userId", admincontroller.registerUserVehicle);
 router.post("/registerDriver/:userId", admincontroller.registerUserDriver);
 router.post(

@@ -6,8 +6,8 @@ const worthinessSchema = mongoose.Schema({
     ref: "User"
   },
   given_name: String,
-  Acn: String,
-  Main_raod: String,
+  acn: String,
+  main_road: String,
   business_address: String,
   post_code: String,
   year: String,
