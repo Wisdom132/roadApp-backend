@@ -57,7 +57,8 @@ exports.adminLogin = (req, res) => {
           const token = jwt.sign(
             {
               email: admin.email,
-              name: admin.email
+              name: admin.name,
+              id: admin._id
             },
             "secret",
             { expiresIn: "240h" }
