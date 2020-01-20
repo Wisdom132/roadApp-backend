@@ -1,23 +1,20 @@
 const createError = require("http-errors");
 const express = require("express");
+const app = express();
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const exphbs = require("express-handlebars");
+const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const indexRouter = require("./api/routes/index");
 const usersRouter = require("./api/routes/users");
 const planRouter = require("./api/routes/plan");
-var cors = require("cors");
-
+const cors = require("cors");
 const config = require("./config/db");
-const bodyParser = require("body-parser");
-const { check, validationResult } = require("express-validator");
-
-const app = express();
 
 //bodyparser
-app.use(bodyParser.json());
+app.use(bodyParser.json()); //config json
+app.use(bodyParser.urlencoded({ extended: false })); //config urlencoded
 app.use(cors());
 //setup db
 mongoose.set("useCreateIndex", true);
@@ -31,8 +28,6 @@ mongoose
   });
 
 app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "/public")));
 
@@ -53,7 +48,7 @@ app.use((err, req, res, next) => {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.json(err);
 });
 
 module.exports = app;

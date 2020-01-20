@@ -1,31 +1,39 @@
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("../models/user/User");
 const Vehicle = require("../models/user/Vehicle");
-const Driver = require("../models/user/Driver");
-const Worthines = require("../models/user/Worthiness");
 const QRCode = require("qrcode");
+let generateThreeRandomNumbers = (min, max) => {
+  let digits;
+  for (var i = 0; i < 3; i++) {
+    digits = Math.floor(Math.random() * max) + min;
+  }
+  return parseInt(digits);
+};
+
+let generateFirstTwoLetters = () => {
+  var text = "";
+  var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let i = 0; i < 2; i++) {
+    text += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  return text;
+};
 
 exports.registerNewAdmin = async (req, res) => {
-  check("email", "Invalid Email Address").isEmail();
   try {
     let response = await Admin.find({ email: req.body.email });
     if (response.length >= 1) {
-      res.status(400).json({ message: "Email Already Exist" });
-    } else {
-      bcrypt.hash(req.body.password, 10, (err, hash) => {
-        const admin = new Admin({
-          email: req.body.email,
-          name: req.body.name,
-          password: hash
-        });
-
-        let newAdmin = admin.save();
-        // res.status(200).json({ data: newAdmin });
-        res.redirect("/admin");
-      });
+      return res.status(400).json({ message: "Email Already Exist" });
     }
+    const admin = new Admin({
+      email: req.body.email,
+      name: req.body.name,
+      password: await bcrypt.hash(req.body.password, 10)
+    });
+
+    let newAdmin = await admin.save();
+    res.status(200).json({ data: newAdmin });
   } catch (err) {
     res.status(400).json({ error: err });
   }
@@ -73,140 +81,69 @@ exports.adminLogin = (req, res) => {
     });
 };
 
-exports.registerNewUser = async (req, res) => {
+exports.registerNewVehicle = async (req, res) => {
   try {
-    let response = await User.find({ email: req.body.email });
-    if (response.length >= 1) {
-      res.status(400).json({ message: "Email Already Exist" });
-    } else {
-      // bcrypt.hash(req.body.password, 10, (err, hash) => {
-      // if (err) return res.status(500).json(err);
-      const user = new User({
-        email: req.body.email,
+    const vehicle = new Vehicle({
+      vehicle_owner_details: {
         name: req.body.name,
-        password: await bcrypt.hash(req.body.password, 10),
-        qrcode: await QRCode.toDataURL(req.body.email)
-      });
-
-      let newuser = await user.save();
-      res.status(200).json({ data: newuser });
-      // });
-    }
+        phone_number: req.body.phone_number,
+        address: req.body.address,
+        state: req.body.state,
+        lga: req.body.lga,
+        nationality: req.body.nationality
+      },
+      vehicle_information: {
+        vehicle_make: req.body.vehicle_make,
+        vehicle_model: req.body.vehicle_model,
+        vehicle_production_year: req.body.vehicle_production_year,
+        vehicle_class: req.body.vehicle_class,
+        vehicle_engine_number: req.body.vehicle_engine_number,
+        vehicle_color: req.body.vehicle_color,
+        chassic_number: req.body.chassic_number,
+        registration_state: req.body.registration_state,
+        registration_lga: req.body.registration_lga,
+        MV_reg: req.body.mv_reg
+      },
+      plate_number: `-${req.body.lga.substring(
+        0,
+        3
+      )}-${generateFirstTwoLetters()}-${generateThreeRandomNumbers(0, 999)}`,
+      password: await bcrypt.hash(req.body.password, 10),
+      qrcode: await QRCode.toDataURL(req.body.phone_number)
+    });
+    let newvehicle = await vehicle.save();
+    res.status(200).json({ data: newvehicle });
   } catch (err) {
     res.status(400).json({ error: err });
   }
 };
 
-exports.listAllUsers = async (req, res) => {
+exports.listAllVehicles = async (req, res) => {
   try {
-    let response = await User.find();
+    let response = await Vehicle.find();
     res.status(200).json({ data: response });
   } catch (err) {
     res.status(500).json({ error: err });
   }
 };
 
-exports.getUserById = async (req, res) => {
+exports.getVehilcleDetailsById = async (req, res) => {
   try {
-    const id = req.params.userId;
-    let userDetails = await User.findOne({ _id: id }, "_id name email qrcode");
-    let userVehicles = await Vehicle.find({ userId: id });
-    let driver = await Driver.find({ userId: id });
-    let wothiness = await Worthines.find({ userId: id });
+    const id = req.params.vehicleId;
+    let vehicleDetails = await Vehicle.findOne({ _id: id });
     res.status(200).json({
-      user: { userDetails, userVehicles, driver, wothiness }
+      details: { vehicleDetails }
     });
   } catch (err) {
     res.status(404).json({ error: err, message: "User Not Found" });
   }
 };
 
-exports.registerUserVehicle = async (req, res) => {
+exports.getUserByPlateNumber = async (req, res) => {
   try {
-    const vehicle = new Vehicle({
-      userId: req.params.userId,
-      company: req.body.company,
-      address_1: req.body.address_1,
-      address_2: req.body.address_2,
-      town: req.body.town,
-      country: req.body.country,
-      mobile_no: req.body.mobile_no,
-      reg_no_of_Vehicle: req.body.reg_no_of_Vehicle,
-      number_Etched_on_side_window: req.body.number_Etched_on_side_window,
-      chassis_number: req.body.chassis_number,
-      vehicle_make: req.body.vehicle_make,
-      model: req.body.model,
-      color: req.body.color,
-      year: req.body.year,
-      current_milleage: req.body.current_milleage,
-      alarm_type: req.body.alarm_type,
-      dealer: req.body.dealer,
-      dealer_town: req.body.dealer_town,
-      plate_number: req.body.plate_nunber
-    });
-    let response = await vehicle.save();
+    let plateNumber = req.body.plate_number;
+    let response = await Vehicle.findOne({ plate_number: plateNumber });
     res.status(200).json({ data: response });
-  } catch (err) {
-    res.status(500).json({ error: err });
-  }
-};
-
-exports.registerUserDriver = async (req, res) => {
-  try {
-    const driver = new Driver({
-      userId: req.params.userId,
-      dob: req.body.dob,
-      gender: req.body.gender,
-      state_of_origin: req.body.state_of_origin,
-      residential_address: req.body.residential_address,
-      phone: req.body.phone,
-      height: req.body.height,
-      facial_mask: req.body.facial_mask,
-      blood_group: req.body.blood_group,
-      geneotype: req.body.geneotype,
-      disabilities: req.body.disabilities
-    });
-    let newDriver = await driver.save();
-    res.status(200).json({ driver: newDriver });
-  } catch (err) {
-    res.status(500).json({ error: err });
-  }
-};
-
-exports.registerUsersWorthiness = async (req, res) => {
-  try {
-    let worthines = new Worthines({
-      userId: req.params.userId,
-      given_name: req.body.given_name,
-      acn: req.body.Acn,
-      main_road: req.body.Main_raod,
-      business_address: req.body.business_address,
-      post_code: req.body.post_code,
-      year: req.body.year,
-      make: req.body.make,
-      vehicle_type: req.body.vehicle_type,
-      model: req.body.model,
-      engine_no: req.body.engine_no,
-      classic_number: req.body.classic_number,
-      compliance_number: req.body.compliance_number,
-      plate_no: req.body.plate_no
-    });
-    let response = await worthines.save();
-    res.status(200).json({ data: response });
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-exports.getUserByEmail = async (req, res) => {
-  try {
-    let email = req.body.email;
-    let response = await User.findOne({ email: email });
-    // if (!response) {
-    //   res.status(404).json({ error: "User Not found" });
-    // } else {
-    res.status(200).json({ data: response });
-    // }
   } catch (err) {
     res.status(500).json({ error: err });
   }

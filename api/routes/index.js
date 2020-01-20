@@ -7,14 +7,9 @@ const admincontroller = require("../controllers/admin");
 router.post("/register", admincontroller.registerNewAdmin);
 router.post("/login", admincontroller.adminLogin);
 router.get("/list-admins", admincontroller.getAllAdmins);
-router.post("/registeruser", admincontroller.registerNewUser);
-router.get("/list-users", admincontroller.listAllUsers);
-router.get("/user/:userId", admincontroller.getUserById);
-router.post("/getuserbyemail", admincontroller.getUserByEmail);
-router.post("/registervehicle/:userId", admincontroller.registerUserVehicle);
-router.post("/registerDriver/:userId", admincontroller.registerUserDriver);
-router.post(
-  "/registerWorthines/:userId",
-  admincontroller.registerUsersWorthiness
-);
+router.post("/registervehicle", admincontroller.registerNewVehicle);
+router.get("/list-vehicles", admincontroller.listAllVehicles);
+router.get("/vehicle/:vehicleId", admincontroller.getVehilcleDetailsById);
+router.post("/get-by-platenumber", admincontroller.getUserByPlateNumber);
+
 module.exports = router;

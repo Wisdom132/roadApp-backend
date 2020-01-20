@@ -1,37 +1,41 @@
-const User = require("../../models/user/User");
+const Vehicle = require("../../models/user/Vehicle");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-exports.userLogin = (req, res) => {
-  User.findOne({ email: req.body.email })
-    .exec()
-    .then(user => {
-      if (user.length < 1) {
-        return res.status(401).json({ error: "User not found" });
-      }
-      bcrypt.compare(req.body.password, user.password, (err, result) => {
-        if (err) {
-          return res.status(401).json({
-            error: "Authentification error"
-          });
-        }
-        if (result) {
-          const token = jwt.sign(
-            {
-              email: user.email,
-              name: user.name,
-              id: user._id
-            },
-            "secret",
-            { expiresIn: "240h" }
-          );
-          //   return res.redirect("/admin/dashboard");
-
-          return res.status(200).json({
-            message: "Authentification Successful",
-            token: token
-          });
-        }
-      });
+exports.userLogin = async (req, res) => {
+  try {
+    let vehicle = await Vehicle.findOne({
+      plate_number: req.body.plate_number
     });
+    if (!vehicle) {
+      return res.status(401).json({ error: "Vehicle not found" });
+    }
+    await bcrypt.compare(req.body.password, vehicle.password, (err, result) => {
+      if (err) {
+        return res.status(401).json({
+          error: "Authentification error"
+        });
+      }
+      if (result) {
+        const token = jwt.sign(
+          {
+            user_details: vehicle.vehicle_owner_details,
+            vehicle_details: vehicle.vehicle_information
+          },
+          "secret",
+          { expiresIn: "240h" }
+        );
+        return res.status(200).json({
+          message: "Authentification Successful",
+          token: token,
+          vehicle: vehicle
+        });
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      message: "Authentification Failed",
+      error: err
+    });
+  }
 };
