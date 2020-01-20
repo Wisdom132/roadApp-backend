@@ -26,6 +26,7 @@ exports.userLogin = async (req, res) => {
           { expiresIn: "240h" }
         );
         return res.status(200).json({
+          role: "user",
           message: "Authentification Successful",
           token: token,
           vehicle: vehicle

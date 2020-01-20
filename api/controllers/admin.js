@@ -74,6 +74,7 @@ exports.adminLogin = (req, res) => {
 
           return res.status(200).json({
             message: "Authentification Successful",
+            role: "admin",
             token: token
           });
         }
