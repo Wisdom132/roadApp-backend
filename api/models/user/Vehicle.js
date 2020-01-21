@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const vehicleSchema = mongoose.Schema({
   vehicle_owner_details: {
     name: String,
+    gender: String,
     phone_number: String,
     address: String,
     state: String,
@@ -29,6 +30,10 @@ const vehicleSchema = mongoose.Schema({
   dateIssued: {
     type: Date,
     default: Date.now()
+  },
+  expiryDate: {
+    type: Date,
+    default: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
   }
 });
 

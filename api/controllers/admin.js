@@ -87,6 +87,7 @@ exports.registerNewVehicle = async (req, res) => {
     const vehicle = new Vehicle({
       vehicle_owner_details: {
         name: req.body.name,
+        gender: req.body.gender,
         phone_number: req.body.phone_number,
         address: req.body.address,
         state: req.body.state,
@@ -105,10 +106,10 @@ exports.registerNewVehicle = async (req, res) => {
         registration_lga: req.body.registration_lga,
         MV_reg: req.body.mv_reg
       },
-      plate_number: `-${req.body.lga.substring(
+      plate_number: `${req.body.registration_lga.substring(
         0,
         3
-      )}-${generateFirstTwoLetters()}-${generateThreeRandomNumbers(0, 999)}`,
+      )}-${generateThreeRandomNumbers(0, 999)}-${generateFirstTwoLetters()}`,
       password: await bcrypt.hash(req.body.password, 10),
       qrcode: await QRCode.toDataURL(req.body.phone_number)
     });
@@ -116,6 +117,7 @@ exports.registerNewVehicle = async (req, res) => {
     res.status(200).json({ data: newvehicle });
   } catch (err) {
     res.status(400).json({ error: err });
+    console.log(err);
   }
 };
 
