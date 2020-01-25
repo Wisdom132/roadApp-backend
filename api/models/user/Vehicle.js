@@ -31,6 +31,10 @@ const vehicleSchema = mongoose.Schema({
     type: Date,
     default: Date.now()
   },
+  year:{
+    type: Date,
+    default: new Date(new Date().getYear())
+  },
   expiryDate: {
     type: Date,
     default: new Date(new Date().setFullYear(new Date().getFullYear() + 1))

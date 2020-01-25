@@ -48,6 +48,19 @@ exports.getAllAdmins = async (req, res) => {
   }
 };
 
+exports.getTransactionMatrics = async (req,res) => {
+  try {
+  let vehicle = await Vehicle.count();
+  let dt = new Date(new Date().getYear());
+  let almostexpired = await Vehicle.find({year:dt})
+  let expired = await Vehicle.find({expiryDate: Date.now()})
+  res.status(200).json({allvehicles:vehicle,almostexpired:almostexpired.length,expired:expired.length})
+  }catch(err) {
+      console.log(err)
+      res.status(500).json({message:"Something went wrong",error:err})
+  }
+}
+
 exports.adminLogin = (req, res) => {
   Admin.findOne({ email: req.body.email })
     .exec()
@@ -111,10 +124,10 @@ exports.registerNewVehicle = async (req, res) => {
         3
       )}-${generateThreeRandomNumbers(0, 999)}-${generateFirstTwoLetters()}`,
       password: await bcrypt.hash(req.body.password, 10),
-      qrcode: await QRCode.toDataURL(req.body.phone_number)
     });
+   vehicle.qrcode= await QRCode.toDataURL(vehicle.plate_number)
     let newvehicle = await vehicle.save();
-    res.status(200).json({ data: newvehicle });
+    res.status(200).json({ data: newvehicle});
   } catch (err) {
     res.status(400).json({ error: err });
     console.log(err);
@@ -151,3 +164,21 @@ exports.getUserByPlateNumber = async (req, res) => {
     res.status(500).json({ error: err });
   }
 };
+
+exports.updateVehicle = async (req,res) => {
+  try {
+    let id = req.params.vehicleId;
+    let update = await Vehicle.findByIdAndUpdate(id,{$set:{
+      dateIssued:req.body.dateIssued,
+      expiryDate:req.body.expiryDate,
+      year:req.body.year
+    }})
+    let updatedVehicle = await update.save()
+    res.status(200).json({updated:updatedVehicle})
+
+  }catch(err){
+    console.log(err)
+    res.status(500).json({ error: err });
+  }
+  
+}

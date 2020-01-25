@@ -12,4 +12,9 @@ router.get("/list-vehicles", admincontroller.listAllVehicles);
 router.get("/vehicle/:vehicleId", admincontroller.getVehilcleDetailsById);
 router.post("/get-by-platenumber", admincontroller.getUserByPlateNumber);
 
+
+//get metrics
+router.get("/get-vehicle-metrics",admincontroller.getTransactionMatrics)
+router.put("/renew-vehicle/:vehicleId",admincontroller.updateVehicle)
+
 module.exports = router;
