@@ -19,7 +19,8 @@ const vehicleSchema = mongoose.Schema({
     chassic_number: Number,
     registration_state: String,
     registration_lga: String,
-    MV_reg: Number
+    MV_reg: Number,
+    insurance:String
   },
   password: {
     type: String,

@@ -66,7 +66,7 @@ exports.adminLogin = (req, res) => {
     .exec()
     .then(admin => {
       if (!admin) {
-        res.status(401).json({ error: "Admin not found" });
+       return res.status(401).json({ error: "Admin not found" });
       }
       bcrypt.compare(req.body.password, admin.password, (err, result) => {
         if (err) {
@@ -117,7 +117,8 @@ exports.registerNewVehicle = async (req, res) => {
         chassic_number: req.body.chassic_number,
         registration_state: req.body.registration_state,
         registration_lga: req.body.registration_lga,
-        MV_reg: req.body.mv_reg
+        MV_reg: req.body.mv_reg,
+        insurance:req.body.insurance
       },
       plate_number: `${req.body.registration_lga.substring(
         0,
