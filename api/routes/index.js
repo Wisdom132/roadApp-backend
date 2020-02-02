@@ -16,5 +16,6 @@ router.post("/get-by-platenumber", admincontroller.getUserByPlateNumber);
 //get metrics
 router.get("/get-vehicle-metrics",admincontroller.getTransactionMatrics)
 router.put("/renew-vehicle/:vehicleId",admincontroller.updateVehicle)
+router.put("/renew-all-vehicle-details/:vehicleId",admincontroller.updateAllDetails);
 
 module.exports = router;

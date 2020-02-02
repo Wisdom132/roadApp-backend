@@ -181,5 +181,16 @@ exports.updateVehicle = async (req,res) => {
     console.log(err)
     res.status(500).json({ error: err });
   }
+
+  exports.updateAllDetails = async (req,res) => {
+    try {
+      let update = await Vehicle.findByIdAndUpdate(id,req.body);
+      let latestInfo = await update.save();
+      res.status(200).json({updated:latestInfo})
+    }catch(err) {
+      console.log(err)
+    res.status(500).json({ error: err });
+    }
+  }
   
 }
